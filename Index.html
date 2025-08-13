@@ -1,1 +1,914 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Musverse — Earn, Redeem, Repeat</title>
+<meta name="description" content="Musverse — earn points, complete tasks, redeem rewards. Local first." />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0f14;
+  --panel:#121823;
+  --panel-2:#0F1520;
+  --brand:#7c3aed;
+  --brand-2:#22d3ee;
+  --accent:#22d3ee;
+  --success:#22c55e;
+  --text:#e6f0ff;
+  --muted:#9bb0d3;
+  --outline:1px solid rgba(255,255,255,.08);
+  --radius:14px;
+  --shadow:0 10px 25px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.02);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+  background:
+    radial-gradient(1200px 600px at 6% -10%, rgba(124,58,237,.25), transparent 50%),
+    radial-gradient(1000px 500px at 120% 10%, rgba(34,211,238,.2), transparent 50%),
+    var(--bg);
+  color:var(--text);
+}
+
+/* utility */
+.hidden{display:none !important}
+.muted{color:var(--muted)}
+.tiny{font-size:12px}
+
+/* Buttons */
+.btn{border:0; padding:10px 14px; border-radius:12px; background:linear-gradient(135deg,var(--brand),var(--brand-2)); color:white; font-weight:700; cursor:pointer; box-shadow:0 6px 16px rgba(124,58,237,.45), inset 0 1px 0 rgba(255,255,255,.15)}
+.btn.secondary{background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12)}
+.btn.success{background:linear-gradient(135deg,#16a34a,#22c55e)}
+.btn.ghost{background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.10); color:var(--text)}
+.btn.warn{background:linear-gradient(135deg,#f59e0b,#fbbf24)}
+.btn.danger{background:linear-gradient(135deg,#ef4444,#f87171)}
+.btn.small{padding:8px 10px; border-radius:10px}
+.btn:disabled{opacity:.6; cursor:not-allowed}
+
+/* Layout */
+.app-wrap{min-height:100vh; display:grid; place-items:center; padding:28px}
+.container{width:1200px; max-width:96vw; display:grid; grid-template-columns:260px 1fr; gap:20px}
+.card{background:var(--panel); border-radius:var(--radius); border:var(--outline); box-shadow:var(--shadow); overflow:hidden}
+.brand{display:flex; gap:12px; align-items:center; padding:16px}
+.logo{width:48px; height:48px; border-radius:12px; display:grid; place-items:center; background:conic-gradient(from 200deg, var(--brand), var(--brand-2)); font-weight:800}
+
+/* Sidebar */
+.sidebar{position:sticky; top:20px; align-self:start; display:flex; flex-direction:column; gap:12px; padding:10px}
+.nav{display:flex; flex-direction:column; gap:8px; padding:10px}
+.nav button{display:flex; gap:10px; align-items:center; padding:12px 14px; border-radius:12px; background:transparent; color:var(--text); border:0; font-weight:700}
+.nav button.active{background:linear-gradient(90deg, rgba(124,58,237,.18), rgba(34,211,238,.12)); outline:1px solid rgba(255,255,255,.06)}
+
+/* Header & main */
+.header{display:flex; gap:12px; align-items:center; justify-content:space-between; padding:16px}
+.search{flex:1; display:flex; align-items:center; gap:10px; background:var(--panel); padding:10px 12px; border-radius:12px; border:var(--outline)}
+.search input{flex:1; background:transparent; border:0; color:var(--text); outline:none}
+.user{display:flex; gap:10px; align-items:center; background:var(--panel); padding:8px 10px; border-radius:999px; border:var(--outline)}
+.avatar{width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,var(--brand),var(--brand-2))}
+
+/* Grid sections */
+.grid{display:grid; gap:20px}
+.kpis{display:flex; gap:12px; flex-wrap:wrap}
+.kpi{flex:1 1 200px; display:flex; gap:12px; align-items:center; background:var(--panel-2); border:var(--outline); padding:12px; border-radius:12px}
+.kpi strong{font-size:18px}
+.pill{padding:6px 10px; border-radius:999px; background:rgba(34,211,238,.12); font-weight:700; color:#a5f3fc; border:1px solid rgba(34,211,238,.25)}
+
+/* lists */
+.list{display:grid; gap:10px}
+.task{display:grid; grid-template-columns:56px 1fr auto; gap:12px; align-items:center; background:var(--panel-2); border:var(--outline); padding:10px; border-radius:12px}
+.icon{width:56px; height:56px; border-radius:12px; display:grid; place-items:center; background:rgba(255,255,255,.02)}
+.badge{font-size:11px; color:#c7d2fe; background:rgba(124,58,237,.12); border:1px solid rgba(124,58,237,.35); padding:4px 8px; border-radius:999px}
+.progress{height:8px; background:rgba(255,255,255,.08); border-radius:999px; overflow:hidden}
+.progress > span{display:block; height:100%; background:linear-gradient(90deg, var(--accent), var(--brand))}
+
+/* redeem */
+.redeem-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:12px}
+.redeem-card{padding:12px; border-radius:12px; background:var(--panel-2); border:var(--outline); display:grid; gap:8px}
+
+/* tables */
+.table{width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:12px; border:var(--outline)}
+.table th, .table td{padding:10px 12px; text-align:left}
+.table thead th{font-size:12px; color:var(--muted); background:rgba(255,255,255,.03)}
+
+/* modal */
+.modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(8,10,16,.56); z-index:1000}
+.modal.open{display:flex}
+.dialog{width:min(720px,94vw); background:var(--panel); border-radius:12px; border:var(--outline); box-shadow:var(--shadow); overflow:hidden}
+.dialog .head{display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:var(--outline)}
+.dialog .content{padding:16px}
+.dialog .foot{display:flex; gap:10px; justify-content:flex-end; padding:12px 16px; border-top:var(--outline)}
+
+/* status */
+.status{display:inline-block; padding:4px 8px; border-radius:999px; font-size:12px}
+.status.proc{color:#fde68a; background:#fde68a22; border:1px solid #fde68a66}
+.status.done{color:#86efac; background:#86efac22; border:1px solid #86efac66}
+.status.fail{color:#fecaca; background:#fecaca22; border:1px solid #fecaca66}
+
+/* responsive */
+@media (max-width: 980px){
+  .container{grid-template-columns:1fr}
+  .sidebar{position:static; height:auto}
+  .search{flex:unset}
+}
+</style>
+</head>
+<body>
+<div class="app-wrap">
+  <div id="authView" class="card" style="max-width:920px; margin:auto; display:grid; gap:12px; padding:18px;">
+    <div class="brand">
+      <div class="logo">♪</div>
+      <div>
+        <h1 style="margin:0">Musverse</h1>
+        <div class="muted tiny">Earn points by completing tasks. Redeem rewards.</div>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:8px;">
+      <button id="tabSignup" class="btn" style="border-radius:10px">Create account</button>
+      <button id="tabLogin" class="btn secondary" style="border-radius:10px">Sign in</button>
+      <div style="flex:1"></div>
+      <button id="guestBtn" class="btn ghost">Continue as guest</button>
+    </div>
+
+    <div id="signupPanel" style="display:grid; gap:8px;">
+      <label>Username</label>
+      <input id="suName" placeholder="username" style="padding:10px; border-radius:8px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); color:var(--text)"/>
+      <label>Password</label>
+      <input id="suPass" type="password" placeholder="password" style="padding:10px; border-radius:8px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); color:var(--text)"/>
+      <label>Country</label>
+      <select id="suCountry" style="padding:10px; border-radius:8px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); color:var(--text)">
+        <option value="NG">Nigeria</option><option value="US">United States</option><option value="GB">United Kingdom</option><option value="IN">India</option><option value="DE">Germany</option>
+      </select>
+      <div style="display:flex; gap:10px;">
+        <button id="createAccount" class="btn">Create account</button>
+        <div style="flex:1"></div>
+      </div>
+    </div>
+
+    <div id="loginPanel" class="hidden" style="display:grid; gap:8px;">
+      <label>Username</label>
+      <input id="liName" placeholder="username" style="padding:10px; border-radius:8px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); color:var(--text)"/>
+      <label>Password</label>
+      <input id="liPass" type="password" placeholder="password" style="padding:10px; border-radius:8px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); color:var(--text)"/>
+      <div style="display:flex; gap:10px;">
+        <button id="loginBtn" class="btn">Sign in</button>
+        <div style="flex:1"></div>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:8px; justify-content:space-between; align-items:center;">
+      <div class="muted tiny">By creating an account you can persist history on this device.</div>
+      <div class="muted tiny">v1.0</div>
+    </div>
+  </div>
+
+  <div id="app" class="container hidden">
+    <aside class="sidebar card">
+      <div style="padding:12px">
+        <div class="brand" style="padding:0">
+          <div class="logo">♪</div>
+          <div>
+            <h2 style="margin:0">Musverse</h2>
+            <div id="sideCountry" class="muted tiny">NG</div>
+          </div>
+        </div>
+        <nav class="nav" style="margin-top:12px">
+          <button data-route="dashboard" class="active">📊 Dashboard</button>
+          <button data-route="earn">🎯 Earn</button>
+          <button data-route="redeem">🎁 Redeem</button>
+          <button data-route="history">🧾 History</button>
+          <button data-route="profile">👤 Profile</button>
+        </nav>
+      </div>
+      <div style="padding:12px">
+        <button id="logout" class="btn ghost w100">Log out</button>
+      </div>
+    </aside>
+
+    <main style="display:grid; gap:14px">
+      <div class="card header" style="align-items:center">
+        <div class="search">
+          🔎 <input id="searchBox" placeholder="Search tasks, offers, or rewards…" />
+        </div>
+        <div style="display:flex; gap:12px; align-items:center">
+          <div class="pill" id="balancePill">0 pts ($0.00)</div>
+          <div class="pill" id="streakPill">0 days</div>
+          <div class="user">
+            <div class="avatar"></div>
+            <div style="line-height:1">
+              <div id="uName" style="font-weight:800">User</div>
+              <div id="uSince" class="muted tiny">since —</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dashboard view -->
+      <section data-view="dashboard" class="grid">
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:14px; border-bottom:var(--outline)">
+            <div>
+              <div style="font-weight:800">Overview</div>
+              <div class="muted tiny">Your performance at a glance</div>
+            </div>
+            <div>
+              <button id="dailyCheck" class="btn secondary">Daily Check‑in</button>
+            </div>
+          </div>
+          <div style="padding:14px;">
+            <div class="kpis">
+              <div class="kpi"><div>⭐</div><div><div class="muted">Total Points</div><strong id="kpiPoints">0</strong></div></div>
+              <div class="kpi"><div>🎯</div><div><div class="muted">Tasks Completed</div><strong id="kpiTasks">0</strong></div></div>
+              <div class="kpi"><div>🔥</div><div><div class="muted">Daily Streak</div><strong id="kpiStreak">0 days</strong></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="padding:14px; border-bottom:var(--outline)">
+            <div style="font-weight:800">Recommended Tasks</div>
+            <div class="muted tiny">Handpicked to boost your balance</div>
+          </div>
+          <div style="padding:14px">
+            <div id="recommended" class="list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Earn view -->
+      <section data-view="earn" class="hidden">
+        <div class="card">
+          <div style="padding:14px; border-bottom:var(--outline)">
+            <div style="font-weight:800">Earn Points</div>
+            <div class="muted tiny">Surveys • Watch • Offers • Quizzes</div>
+          </div>
+          <div style="padding:14px">
+            <div id="taskList" class="list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Redeem view -->
+      <section data-view="redeem" class="hidden">
+        <div class="card">
+          <div style="padding:14px; border-bottom:var(--outline)">
+            <div style="font-weight:800">Redeem Center</div>
+            <div class="muted tiny">Gift cards and cash</div>
+          </div>
+          <div style="padding:14px">
+            <div id="redeemList" class="redeem-grid"></div>
+            <h3 style="margin-top:16px">Your Redeem Requests</h3>
+            <table class="table" id="redeemTable">
+              <thead><tr><th>Date</th><th>Reward</th><th>Status</th><th>Points</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- History view -->
+      <section data-view="history" class="hidden">
+        <div class="card">
+          <div style="padding:14px; border-bottom:var(--outline)">
+            <div style="font-weight:800">Activity History</div>
+            <div class="muted tiny">Everything you've done</div>
+          </div>
+          <div style="padding:14px">
+            <table class="table" id="historyTable">
+              <thead><tr><th>Date</th><th>Action</th><th>Details</th><th>± Points</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Profile view -->
+      <section data-view="profile" class="hidden">
+        <div class="card">
+          <div style="padding:14px; border-bottom:var(--outline)">
+            <div style="font-weight:800">Profile</div>
+            <div class="muted tiny">Manage your account</div>
+          </div>
+          <div style="padding:14px; display:grid; gap:12px">
+            <div style="display:grid; gap:8px; max-width:640px">
+              <label>Username</label>
+              <input id="pfName" style="padding:10px; border-radius:8px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); color:var(--text)"/>
+              <label>Country</label>
+              <select id="pfCountry" style="padding:10px; border-radius:8px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); color:var(--text)">
+                <option value="NG">Nigeria</option><option value="US">United States</option><option value="GB">United Kingdom</option><option value="IN">India</option><option value="DE">Germany</option>
+              </select>
+              <div style="display:flex; gap:8px">
+                <button id="saveProfile" class="btn">Save Changes</button>
+                <div style="flex:1"></div>
+              </div>
+            </div>
+
+            <div style="display:grid; gap:8px; max-width:640px; margin-top:8px">
+              <label>Change Password</label>
+              <input id="pfPass" type="password" placeholder="New password" style="padding:10px; border-radius:8px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); color:var(--text)"/>
+              <div style="display:flex; gap:8px">
+                <button id="savePass" class="btn">Update Password</button>
+                <button id="exportData" class="btn ghost">Export Data</button>
+                <button id="resetData" class="btn danger">Delete Account</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- Task Modal -->
+<div id="taskModal" class="modal" role="dialog" aria-modal="true">
+  <div class="dialog">
+    <div class="head">
+      <div>
+        <div id="taskTitle" style="font-weight:800">Task</div>
+        <div id="taskSub" class="muted tiny">Complete to earn points</div>
+      </div>
+      <div>
+        <button id="taskClose" class="btn secondary">Close</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="progress" style="margin-bottom:10px"><span id="taskProgress" style="width:0%"></span></div>
+      <div id="taskTimer" class="muted">Ready.</div>
+      <div id="taskCheck" class="hidden" style="margin-top:12px">
+        <div><strong>Quick check:</strong> What is <span id="qA">2</span> + <span id="qB">2</span>?</div>
+        <input id="qInput" placeholder="Answer" style="padding:8px; border-radius:8px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); color:var(--text); margin-top:8px"/>
+      </div>
+    </div>
+    <div class="foot">
+      <button id="startTask" class="btn">Start</button>
+      <button id="finishTask" class="btn success" disabled>Finish & Claim</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/*
+  Single-file Musverse (HTML + CSS + JS)
+  - No external backend
+  - Persists accounts, points, history in localStorage under key "musverse_html_v1"
+  - UI shows no "demo" wording; history is retained
+*/
+
+(() => {
+  /* Helpers */
+  const $ = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => Array.from((r||document).querySelectorAll(s));
+  const uid = () => Math.random().toString(36).slice(2,10);
+  const fmt = d => new Date(d).toLocaleString();
+  const toUSD = pts => (pts/100).toFixed(2);
+
+  const STORAGE = 'musverse_html_v1';
+
+  /* DB */
+  function defaultDB(){
+    return {
+      auth: null,
+      users: {},
+      catalog: seedTasks(),
+      rewards: seedRewards()
+    };
+  }
+
+  function seedTasks(){
+    return [
+      { id: uid(), type:'survey', title:'Music Habits (5 min)', points:80, cool:8*60, est:45, featured:true },
+      { id: uid(), type:'video', title:'Watch: Indie Artist Spotlight', points:20, cool:20*60, est:20 },
+      { id: uid(), type:'offer', title:'Install sample player', points:120, cool:12*60*60, est:60 },
+      { id: uid(), type:'quiz', title:'Music Theory Basics', points:50, cool:2*60*60, est:40 },
+      { id: uid(), type:'survey', title:'Headphones Preferences', points:60, cool:6*60*60, est:40, featured:true },
+      { id: uid(), type:'video', title:'Studio Tour', points:25, cool:15*60, est:25 }
+    ];
+  }
+
+  function seedRewards(){
+    return [
+      { id:'amz5', vendor:'Amazon', amount:5, points:500 },
+      { id:'amz10', vendor:'Amazon', amount:10, points:1000 },
+      { id:'spf15', vendor:'Spotify', amount:15, points:1500 },
+      { id:'stm25', vendor:'Steam', amount:25, points:2500 },
+      { id:'pp50', vendor:'PayPal', amount:50, points:5000 },
+      { id:'pp100', vendor:'PayPal', amount:100, points:10000 }
+    ];
+  }
+
+  let DB = load();
+
+  function load(){
+    try{
+      const raw = localStorage.getItem(STORAGE);
+      return raw ? JSON.parse(raw) : defaultDB();
+    } catch(e){
+      console.warn('load failed', e);
+      return defaultDB();
+    }
+  }
+
+  function save(){
+    try { localStorage.setItem(STORAGE, JSON.stringify(DB)); } catch(e){ console.warn(e); }
+  }
+
+  function ensureUser(name){
+    if(!DB.users[name]){
+      DB.users[name] = {
+        id: uid(),
+        name,
+        pass: '',
+        country: 'NG',
+        createdAt: Date.now(),
+        points: 0,
+        pending: 0,
+        tasksCompleted: 0,
+        streak: { last: null, count: 0 },
+        tasks: {}, // taskId -> last timestamp
+        redeems: [],
+        tx: [],
+        history: []
+      };
+    }
+    return DB.users[name];
+  }
+
+  /* AUTH UI */
+  const authView = $('#authView');
+  const appView = $('#app');
+  const signupPanel = $('#signupPanel');
+  const loginPanel = $('#loginPanel');
+
+  $('#tabSignup').addEventListener('click', () => { signupPanel.classList.remove('hidden'); loginPanel.classList.add('hidden'); $('#tabSignup').classList.add('btn'); $('#tabLogin').classList.remove('btn'); });
+  $('#tabLogin').addEventListener('click', () => { signupPanel.classList.add('hidden'); loginPanel.classList.remove('hidden'); $('#tabLogin').classList.add('btn'); $('#tabSignup').classList.remove('btn'); });
+
+  $('#createAccount').addEventListener('click', () => {
+    const name = ($('#suName').value || '').trim();
+    const pass = ($('#suPass').value || '').trim();
+    const country = ($('#suCountry').value || 'NG');
+    if(!name || !pass) { alert('Enter username and password'); return; }
+    if(DB.users[name]) { alert('Username already exists'); return; }
+    const u = ensureUser(name);
+    u.pass = pass; u.country = country;
+    u.history.push({ date: Date.now(), action: 'Account created', detail: 'Sign up', points: 0 });
+    DB.auth = { username: name };
+    save();
+    showApp();
+  });
+
+  $('#loginBtn').addEventListener('click', () => {
+    const name = ($('#liName').value || '').trim();
+    const pass = ($('#liPass').value || '').trim();
+    const u = DB.users[name];
+    if(!u || u.pass !== pass){ alert('Invalid credentials'); return; }
+    DB.auth = { username: name };
+    save();
+    showApp();
+  });
+
+  $('#guestBtn').addEventListener('click', () => {
+    const guest = 'guest_' + Math.random().toString(36).slice(2,6);
+    const u = ensureUser(guest);
+    u.pass = '';
+    u.history.push({ date: Date.now(), action: 'Guest session', detail: 'Entered as guest', points: 0 });
+    DB.auth = { username: guest };
+    save();
+    showApp();
+  });
+
+  function showApp(){
+    authView.classList.add('hidden');
+    appView.classList.remove('hidden');
+    renderAll();
+  }
+
+  if(DB.auth && DB.users[DB.auth.username]) showApp();
+
+  /* Routing */
+  const navBtns = $$('.nav button');
+  navBtns.forEach(b => b.addEventListener('click', (e) => {
+    navBtns.forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    const route = b.getAttribute('data-route');
+    $$('[data-view]').forEach(v => v.classList.add('hidden'));
+    const view = document.querySelector(`[data-view="${route}"]`);
+    if(view) view.classList.remove('hidden');
+    if(route === 'redeem') renderRedeem();
+    if(route === 'history') renderHistory();
+    if(route === 'profile') renderProfile();
+    if(route === 'dashboard') renderAll();
+    if(route === 'earn') renderAll();
+  }));
+
+  $('#logout').addEventListener('click', () => {
+    DB.auth = null;
+    save();
+    location.reload();
+  });
+
+  /* Rendering */
+  function currentUser(){ return DB.auth ? DB.users[DB.auth.username] : null; }
+
+  function renderHeader(){
+    const u = currentUser(); if(!u) return;
+    $('#uName').textContent = u.name;
+    $('#uSince').textContent = 'since ' + new Date(u.createdAt).toLocaleDateString();
+    $('#sideCountry').textContent = u.country;
+    $('#balancePill').textContent = `${u.points} pts ($${toUSD(u.points)})`;
+    $('#streakPill').textContent = `${u.streak.count} day${u.streak.count===1?'':'s'}`;
+    $('#kpiPoints').textContent = u.points;
+    $('#kpiTasks').textContent = u.tasksCompleted;
+    $('#kpiStreak').textContent = `${u.streak.count} day${u.streak.count===1?'':'s'}`;
+  }
+
+  function renderRecommended(){
+    const wrap = $('#recommended'); wrap.innerHTML = '';
+    const picks = DB.catalog.slice().sort((a,b)=>(b.featured?1:0)-(a.featured?1:0) || b.points-a.points).slice(0,4);
+    picks.forEach(t => wrap.appendChild(taskRow(t)));
+  }
+
+  function renderTaskList(){
+    const wrap = $('#taskList'); if(!wrap) return; wrap.innerHTML = '';
+    DB.catalog.slice().sort((a,b)=>b.points-a.points).forEach(t => wrap.appendChild(taskRow(t)));
+  }
+
+  function cooldownLeft(task, u){
+    const last = u.tasks[task.id] || 0;
+    return Math.max(0, Math.floor((last + task.cool*1000 - Date.now())/1000));
+  }
+
+  function humanize(sec){
+    if(sec<=0) return '0s';
+    const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = sec%60;
+    return `${h?h+'h ':''}${m?m+'m ':''}${s}s`.trim();
+  }
+
+  function taskRow(task){
+    const u = currentUser();
+    const cd = cooldownLeft(task, u);
+    const row = document.createElement('div');
+    row.className = 'task';
+    row.innerHTML = `
+      <div class="icon">${iconFor(task.type)}</div>
+      <div>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+          <strong>${task.title}</strong>
+          <span class="badge">${task.type.toUpperCase()}</span>
+          <span class="badge">+${task.points} pts</span>
+          ${task.featured? '<span class="badge">FEATURED</span>' : ''}
+        </div>
+        <div class="muted" style="margin-top:6px">${cd>0 ? 'Cooldown • ' + humanize(cd) : 'Ready • ~' + Math.max(20, task.est||30) + 's'}</div>
+      </div>
+      <div class="flex">
+        <button class="btn ${cd>0? 'secondary' : ''}" ${cd>0? 'disabled' : ''} data-action="start" data-id="${task.id}">${cd>0? 'Wait' : 'Start'}</button>
+      </div>
+    `;
+    return row;
+  }
+
+  function iconFor(type){
+    const map = { survey:'📝', video:'🎬', offer:'🧩', quiz:'❓' };
+    return map[type] || '⭐';
+  }
+
+  function renderRedeem(){
+    const wrap = $('#redeemList'); wrap.innerHTML = '';
+    DB.rewards.forEach(r => {
+      const el = document.createElement('div'); el.className = 'redeem-card';
+      el.innerHTML = `<div style="height:56px; border-radius:8px; background:linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.03));"></div>
+        <div><strong>${r.vendor} $${r.amount}</strong></div>
+        <div class="muted">${r.points} pts</div>
+        <div style="margin-top:8px"><button class="btn small" data-redeem="${r.id}">Redeem</button></div>`;
+      wrap.appendChild(el);
+    });
+
+    // redeem table
+    const tbody = $('#redeemTable tbody'); tbody.innerHTML = '';
+    const u = currentUser();
+    u.redeems.slice().reverse().forEach(rd => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${fmt(rd.date)}</td><td>${rd.reward}</td><td>${statusBadge(rd.status)}</td><td>${rd.points}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function statusBadge(s){
+    if(s==='processing') return '<span class="status proc">Processing</span>';
+    if(s==='completed') return '<span class="status done">Completed</span>';
+    return '<span class="status fail">Failed</span>';
+  }
+
+  function renderHistory(){
+    const tbody = $('#historyTable tbody'); tbody.innerHTML = '';
+    const u = currentUser();
+    u.history.slice().reverse().forEach(h => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${fmt(h.date)}</td><td>${h.action}</td><td>${h.detail}</td><td style="color:${h.points>=0?'#86efac':'#fecaca'}">${h.points>0?'+':''}${h.points}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderProfile(){
+    const u = currentUser();
+    $('#pfName').value = u.name;
+    $('#pfCountry').value = u.country;
+  }
+
+  function renderAll(){
+    renderHeader();
+    renderRecommended();
+    renderTaskList();
+    renderRedeem();
+    renderHistory();
+  }
+
+  /* Task modal and flow */
+  const modal = $('#taskModal');
+  const taskTitle = $('#taskTitle');
+  const taskSub = $('#taskSub');
+  const taskProgress = $('#taskProgress');
+  const taskTimer = $('#taskTimer');
+  const taskCheck = $('#taskCheck');
+  const qA = $('#qA'), qB = $('#qB'), qInput = $('#qInput');
+  const startTaskBtn = $('#startTask'), finishTaskBtn = $('#finishTask'), closeTaskBtn = $('#taskClose');
+
+  let currentTask = null, countdown = null, progInt = null, secondsLeft = 0;
+
+  document.addEventListener('click', (e) => {
+    const startBtn = e.target.closest('[data-action="start"]');
+    if(startBtn){
+      const id = startBtn.getAttribute('data-id');
+      const task = DB.catalog.find(t => t.id === id);
+      openTask(task);
+      return;
+    }
+    const redeemBtn = e.target.closest('[data-redeem]');
+    if(redeemBtn){
+      const rid = redeemBtn.getAttribute('data-redeem');
+      const r = DB.rewards.find(rr => rr.id === rid);
+      requestRedeem(r);
+      return;
+    }
+  });
+
+  function openTask(task){
+    currentTask = task;
+    taskTitle.textContent = task.title;
+    taskSub.textContent = `${task.type.toUpperCase()} • +${task.points} pts`;
+    taskProgress.style.width = '0%';
+    taskTimer.textContent = 'Ready.';
+    taskCheck.classList.add('hidden');
+    qInput.value = '';
+    startTaskBtn.disabled = false;
+    finishTaskBtn.disabled = true;
+    modal.classList.add('open');
+  }
+
+  function closeTask(){
+    modal.classList.remove('open');
+    clearIntervals();
+  }
+
+  closeTaskBtn.addEventListener('click', closeTask);
+
+  function clearIntervals(){
+    clearInterval(countdown);
+    clearInterval(progInt);
+  }
+
+  startTaskBtn.addEventListener('click', () => {
+    if(!currentTask) return;
+    const u = currentUser();
+    const left = cooldownLeft(currentTask, u);
+    if(left > 0){ alert('Task is on cooldown.'); return; }
+    const duration = Math.max(15, Math.min(90, currentTask.est || 30));
+    secondsLeft = duration;
+    startTaskBtn.disabled = true;
+    finishTaskBtn.disabled = true;
+    // anti-bot
+    const a = Math.floor(Math.random()*6)+2, b = Math.floor(Math.random()*6)+2;
+    qA.textContent = a; qB.textContent = b;
+    taskTimer.textContent = `Time remaining: ${secondsLeft}s`;
+    progInt = setInterval(() => {
+      const pct = 100 * (1 - secondsLeft/duration);
+      taskProgress.style.width = pct.toFixed(2) + '%';
+    }, 200);
+    countdown = setInterval(() => {
+      secondsLeft--;
+      taskTimer.textContent = `Time remaining: ${secondsLeft}s`;
+      if(secondsLeft <= 0){
+        clearInterval(countdown);
+        taskTimer.textContent = 'Time done. Answer the quick check to claim.';
+        taskCheck.classList.remove('hidden');
+        finishTaskBtn.disabled = false;
+      }
+    }, 1000);
+  });
+
+  finishTaskBtn.addEventListener('click', () => {
+    if(!currentTask) return;
+    const expected = parseInt(qA.textContent, 10) + parseInt(qB.textContent, 10);
+    const ans = parseInt(qInput.value || '0', 10);
+    if(ans !== expected){ alert('Incorrect answer.'); return; }
+    completeTask(currentTask);
+    closeTask();
+  });
+
+  function completeTask(task){
+    const u = currentUser();
+    // set cooldown
+    u.tasks[task.id] = Date.now();
+    // add points
+    u.points += task.points;
+    u.tx.push({ id: uid(), date: Date.now(), type: 'task', detail: task.title, points: +task.points });
+    u.history.push({ date: Date.now(), action: 'Task completed', detail: task.title, points: +task.points });
+    u.tasksCompleted += 1;
+    // quests/progress could be updated here
+    save();
+    renderAll();
+  }
+
+  /* Daily check-in */
+  $('#dailyCheck').addEventListener('click', () => {
+    const u = currentUser();
+    const today = new Date().toDateString();
+    const last = u.streak.last ? new Date(u.streak.last).toDateString() : null;
+    if(last === today){ alert('Already checked in today.'); return; }
+    const yesterday = new Date(Date.now() - 24*3600*1000).toDateString();
+    u.streak.count = (last === yesterday) ? (u.streak.count + 1) : 1;
+    u.streak.last = Date.now();
+    const bonus = 10 + Math.min(40, 5*(u.streak.count-1));
+    u.points += bonus;
+    u.tx.push({ id: uid(), date: Date.now(), type: 'checkin', detail: `Day ${u.streak.count}`, points: +bonus });
+    u.history.push({ date: Date.now(), action: 'Daily check-in', detail: `Day ${u.streak.count}`, points: +bonus });
+    save();
+    renderAll();
+  });
+
+  /* Redeem flow */
+  function requestRedeem(reward){
+    const u = currentUser();
+    if(u.points < reward.points){ alert('Not enough points.'); return; }
+    const rd = { id: uid(), date: Date.now(), reward: `${reward.vendor} $${reward.amount}`, points: reward.points, status: 'processing' };
+    u.redeems.push(rd);
+    u.points -= reward.points;
+    u.pending += reward.points;
+    u.tx.push({ id: uid(), date: Date.now(), type: 'redeem_req', detail: rd.reward, points: -reward.points });
+    u.history.push({ date: Date.now(), action: 'Redeem requested', detail: rd.reward, points: -reward.points });
+    save();
+    renderRedeem();
+    renderHistory();
+    alert('Redeem request submitted. Use "History" or check table for status. Use "Profile → Export Data" to keep a copy.');
+  }
+
+  /* Render redeem table and history */
+  function renderRedeem(){
+    const wrap = $('#redeemList'); if(wrap) wrap.innerHTML = '';
+    DB.rewards.forEach(r => {
+      const el = document.createElement('div'); el.className = 'redeem-card';
+    });
+
+    const tbody = $('#redeemTable tbody'); if(tbody){
+      tbody.innerHTML = '';
+      const u = currentUser();
+      u.redeems.slice().reverse().forEach(rd => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${fmt(rd.date)}</td><td>${rd.reward}</td><td>${statusBadge(rd.status)}</td><td>${rd.points}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    // create UI for rewards (separate area)
+    const rewardsWrap = $('#redeemList');
+    rewardsWrap.innerHTML = '';
+    DB.rewards.forEach(r => {
+      const el = document.createElement('div'); el.className = 'redeem-card';
+      el.innerHTML = `<div style="height:56px;border-radius:8px;background:linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.03));"></div>
+        <div><strong>${r.vendor} $${r.amount}</strong></div><div class="muted">${r.points} pts</div><div style="margin-top:8px"><button class="btn small" data-redeem="${r.id}">Redeem</button></div>`;
+      rewardsWrap.appendChild(el);
+    });
+  }
+
+  /* History rendering */
+  function renderHistory(){
+    const tbody = $('#historyTable tbody');
+    if(!tbody) return;
+    tbody.innerHTML = '';
+    const u = currentUser();
+    u.history.slice().reverse().forEach(h => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${fmt(h.date)}</td><td>${h.action}</td><td>${h.detail}</td><td style="color:${h.points>=0?'#86efac':'#fecaca'}">${h.points>0?'+':''}${h.points}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  /* Profile actions */
+  $('#saveProfile').addEventListener('click', () => {
+    const u = currentUser();
+    const newName = ($('#pfName').value || '').trim();
+    const newCountry = $('#pfCountry').value || 'NG';
+    if(!newName){ alert('Username cannot be empty'); return; }
+    if(newName !== u.name){
+      if(DB.users[newName]){ alert('That username is taken'); return; }
+      DB.users[newName] = { ...u, name: newName };
+      delete DB.users[u.name];
+      DB.auth.username = newName;
+    }
+    DB.users[DB.auth.username].country = newCountry;
+    save();
+    renderAll();
+    alert('Profile updated.');
+  });
+
+  $('#savePass').addEventListener('click', () => {
+    const u = currentUser();
+    const p = ($('#pfPass').value || '').trim();
+    if(!p){ alert('Enter new password'); return; }
+    u.pass = p; $('#pfPass').value = '';
+    save();
+    alert('Password updated.');
+  });
+
+  $('#exportData').addEventListener('click', () => {
+    const u = currentUser();
+    const blob = new Blob([JSON.stringify(u, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = `musverse_${u.name}.json`; document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  $('#resetData').addEventListener('click', () => {
+    if(!confirm('Delete your account and all local data? This cannot be undone.')) return;
+    const u = currentUser();
+    delete DB.users[u.name];
+    DB.auth = null;
+    save();
+    location.reload();
+  });
+
+  /* Search filter */
+  $('#searchBox').addEventListener('input', (e) => {
+    const q = (e.target.value || '').toLowerCase();
+    $$('#taskList .task').forEach(node => {
+      const title = node.querySelector('strong')?.textContent.toLowerCase() || '';
+      node.style.display = title.includes(q) ? '' : 'none';
+    });
+    $$('#redeemList .redeem-card').forEach(node => {
+      const title = node.querySelector('strong')?.textContent.toLowerCase() || '';
+      node.style.display = title.includes(q) ? '' : 'none';
+    });
+  });
+
+  /* Helper: spawn UI */
+  function renderTaskUI(){
+    const rec = $('#recommended'); rec.innerHTML = '';
+    const picks = DB.catalog.slice().sort((a,b)=>(b.featured?1:0)-(a.featured?1:0) || b.points-a.points).slice(0,4);
+    picks.forEach(t => rec.appendChild(taskRow(t)));
+    renderTaskList();
+  }
+
+  /* Initialize UI & events */
+  function renderInit(){
+    // populate tasks and rewards in UI
+    renderAll();
+
+    // bind redeem click (delegated)
+    document.addEventListener('click', (e) => {
+      const redeemClick = e.target.closest('[data-redeem]');
+      if(redeemClick){
+        const id = redeemClick.getAttribute('data-redeem');
+        const r = DB.rewards.find(x => x.id === id);
+        if(r) requestRedeem(r);
+      }
+    });
+  }
+
+  /* Utilities for cooldown display */
+  function cooldownLeft(task, u){
+    return Math.max(0, Math.floor((u.tasks[task.id] || 0 + task.cool*1000 - Date.now())/1000));
+  }
+
+  /* Expose some functionality */
+  renderInit();
+
+  // If no auth and user has accounts, show auth; otherwise auto show app for last auth
+  if(!DB.auth){
+    // show auth as default (already visible)
+  } else {
+    // already handled above on showApp
+  }
+
+  // Save on unload
+  window.addEventListener('beforeunload', () => save());
+
+  // If user returns and has auth, ensure UI updated
+  if(DB.auth && DB.users[DB.auth.username]) {
+    showApp();
+  }
+
+})();
+</script>
+</body>
+</html>
